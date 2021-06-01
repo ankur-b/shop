@@ -1,9 +1,12 @@
 import React, {useContext} from 'react';
 import {FlatList, Text} from 'react-native';
 import {Context as ProductContext} from '../../Context/ProductContext';
+import {Context as CartContext} from '../../Context/CartContext';
 import ProductItem from '../../Components/Shop/ProductItem';
 const ProductOverview = props => {
   const {state} = useContext(ProductContext);
+  const cartContext = useContext(CartContext)
+  console.log(cartContext.state)
   return (
     <FlatList
       data={state.availableProducts}
@@ -19,7 +22,9 @@ const ProductOverview = props => {
               productTitle:itemData.item.title
             });
           }}
-          onAddToCart={() => {}}
+          onAddToCart={()=>{
+            cartContext.addToCart(itemData.item)
+          }}
         />
       )}
     />

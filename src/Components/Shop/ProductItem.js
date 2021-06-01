@@ -56,7 +56,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     height: 300,
     margin: 20,
-    overflow: 'hidden',
   },
   touchable: {
     borderRadius: 10,
@@ -75,10 +74,12 @@ const styles = StyleSheet.create({
     height: '20%',
   },
   title: {
+    fontFamily:'open-sans-bold',
     fontSize: 18,
-    marginVertical: 4,
+    marginVertical: 2,
   },
   price: {
+    fontFamily:'OpenSans-Bold',
     fontSize: 14,
     color: '#888',
   },
