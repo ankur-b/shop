@@ -5,6 +5,7 @@ import {HeaderButtons, Item} from 'react-navigation-header-buttons';
 import HeaderButton from '../UI/HeaderButton';
 import ProductOverview from '../Screens/Shop/ProductOverview';
 import ProductDetail from '../Screens/Shop/ProductsDetail';
+import Orders from '../Screens/Shop/Orders'
 import Cart from '../Screens/Shop/Cart';
 import Colors from '../Constants/Colors';
 const ShopStack = createStackNavigator();

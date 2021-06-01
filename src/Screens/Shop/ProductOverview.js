@@ -6,7 +6,6 @@ import ProductItem from '../../Components/Shop/ProductItem';
 const ProductOverview = props => {
   const {state} = useContext(ProductContext);
   const cartContext = useContext(CartContext)
-  console.log(cartContext.state)
   return (
     <FlatList
       data={state.availableProducts}
