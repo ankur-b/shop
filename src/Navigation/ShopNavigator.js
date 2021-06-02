@@ -9,9 +9,11 @@ import ProductOverview from '../Screens/Shop/ProductOverview';
 import ProductDetail from '../Screens/Shop/ProductsDetail';
 import Orders from '../Screens/Shop/Orders';
 import Cart from '../Screens/Shop/Cart';
+import UserProducts from '../Screens/User/UserProducts';
 import Colors from '../Constants/Colors';
 const ProductsStack = createStackNavigator();
 const OrderStack = createStackNavigator();
+const userStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const ProductsStackScreens = () => {
   return (
@@ -93,6 +95,36 @@ const OrderStackScreens = () => {
     </OrderStack.Navigator>
   );
 };
+const userStackScreens = () => {
+  return (
+    <userStack.Navigator
+      screenOptions={{
+        headerTitle: 'Your Orders',
+        headerStyle: {
+          backgroundColor: Platform.OS === 'android' ? Colors.primary : '',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+      }}>
+      <userStack.Screen
+        name="User Products"
+        component={UserProducts}
+        options={({navigation}) => ({
+          headerLeft: props => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+              <Item
+                title="Menu"
+                iconName={Platform.OS === 'android' ? 'md-menu' : 'ios-menu'}
+                onPress={() => {
+                  navigation.toggleDrawer();
+                }}
+              />
+            </HeaderButtons>
+          ),
+        })}
+      />
+    </userStack.Navigator>
+  );
+};
 const DrawerScreen = () => {
   return (
     <Drawer.Navigator
@@ -123,6 +155,18 @@ const DrawerScreen = () => {
         }}
         name="Orders"
         component={OrderStackScreens}
+      />
+      <Drawer.Screen
+        options={{
+          drawerIcon: drawerConfig => (
+            <Icon
+              name={Platform.OS === 'android' ? 'md-create' : 'ios-create'}
+              size={23}
+            />
+          ),
+        }}
+        name="User Products"
+        component={userStackScreens}
       />
     </Drawer.Navigator>
   );

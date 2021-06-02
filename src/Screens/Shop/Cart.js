@@ -41,6 +41,7 @@ const CartScreen = props => {
             quantity={itemData.item.quantity}
             amount={itemData.item.sum.toFixed(2)}
             title={itemData.item.productTitle}
+            deletable
             onRemove={() => {removeFromCart(itemData.item.productId)}}
           />
         )}

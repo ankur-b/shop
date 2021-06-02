@@ -9,5 +9,5 @@ const ProductReducer = (state, action) => {
 export const {Provider, Context} = createDataContext(
   ProductReducer,
   {},
-  {availableProducts:PRODUCTS,userProducts:PRODUCTS.filter(prod => prod.ownerId === 'ui')},
+  {availableProducts:PRODUCTS,userProducts:PRODUCTS.filter(prod => prod.ownerId === 'u1')},
 );
