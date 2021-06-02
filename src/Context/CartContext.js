@@ -30,23 +30,38 @@ const CartReducer = (state, action) => {
           selectedCartItem.quantity - 1,
           selectedCartItem.productPrice,
           selectedCartItem.productTitle,
-          selectedCartItem.sum.toFixed(2) - selectedCartItem.productPrice.toFixed(2),
+          selectedCartItem.sum.toFixed(2) -
+            selectedCartItem.productPrice.toFixed(2),
         );
-        updatedCartItems = {...state.items,[action.payload]:updatedCartItem}
+        updatedCartItems = {...state.items, [action.payload]: updatedCartItem};
       } else {
-        updatedCartItems = {...state.items}
-        delete updatedCartItems[action.payload]
+        updatedCartItems = {...state.items};
+        delete updatedCartItems[action.payload];
       }
       return {
-          ...state,
-          items:updatedCartItems,
-          totalAmount:state.totalAmount.toFixed(2) - selectedCartItem.productPrice.toFixed(2)
-      }
+        ...state,
+        items: updatedCartItems,
+        totalAmount:
+          state.totalAmount.toFixed(2) -
+          selectedCartItem.productPrice.toFixed(2),
+      };
     case 'CLEAR_CART':
-        return{
-          items:{},
-          totalAmount:0
-        }
+      return {
+        items: {},
+        totalAmount: 0,
+      };
+    case 'DELETE_PRODUCT':
+      if(!state.items[action.payload]){
+        return state
+      }
+      const updatedItems = state.items;
+      const itemTotal = state.items[action.payload].sum
+      delete updatedItems[action.payload]
+      return {
+        ...state,
+        items: updatedItems,
+        totalAmount: state.totalAmount - itemTotal  
+      };
     default:
       return state;
   }
@@ -57,11 +72,14 @@ const addToCart = dispatch => product => {
 const removeFromCart = dispatch => pid => {
   dispatch({type: 'REMOVE_FROM_CART', payload: pid});
 };
-const clearCart = dispatch => pid =>{
-  dispatch({type:'CLEAR_CART',payload:pid})
-}
+const clearCart = dispatch => pid => {
+  dispatch({type: 'CLEAR_CART', payload: pid});
+};
+const deleteProduct = dispatch => pid => {
+  dispatch({type: 'DELETE_PRODUCT', payload: pid});
+};
 export const {Provider, Context} = createDataContext(
   CartReducer,
-  {addToCart,removeFromCart,clearCart},
+  {addToCart, removeFromCart, clearCart,deleteProduct},
   {items: {}, totalAmount: 0},
 );

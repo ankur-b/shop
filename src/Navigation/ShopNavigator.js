@@ -10,6 +10,7 @@ import ProductDetail from '../Screens/Shop/ProductsDetail';
 import Orders from '../Screens/Shop/Orders';
 import Cart from '../Screens/Shop/Cart';
 import UserProducts from '../Screens/User/UserProducts';
+import EditProduct from '../Screens/User/EditProduct';
 import Colors from '../Constants/Colors';
 const ProductsStack = createStackNavigator();
 const OrderStack = createStackNavigator();
@@ -99,7 +100,6 @@ const userStackScreens = () => {
   return (
     <userStack.Navigator
       screenOptions={{
-        headerTitle: 'Your Orders',
         headerStyle: {
           backgroundColor: Platform.OS === 'android' ? Colors.primary : '',
         },
@@ -116,6 +116,39 @@ const userStackScreens = () => {
                 iconName={Platform.OS === 'android' ? 'md-menu' : 'ios-menu'}
                 onPress={() => {
                   navigation.toggleDrawer();
+                }}
+              />
+            </HeaderButtons>
+          ),
+          headerRight: props => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+              <Item
+                title="Add"
+                iconName={
+                  Platform.OS === 'android' ? 'md-create' : 'ios-create'
+                }
+                onPress={() => {
+                  navigation.navigate('Edit Product', {productId: null});
+                }}
+              />
+            </HeaderButtons>
+          ),
+        })}
+      />
+      <userStack.Screen
+        name="Edit Product"
+        component={EditProduct}
+        options={props => ({
+          title: props.route.params.productId ? 'Edit Product' : 'Add Product',
+          headerRight: () => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+              <Item
+                title="Save"
+                iconName={
+                  Platform.OS === 'android' ? 'md-checkmark' : 'ios-checkmark'
+                }
+                onPress={() => {
+                  JSON.stringify(props.route.params.submit())
                 }}
               />
             </HeaderButtons>
