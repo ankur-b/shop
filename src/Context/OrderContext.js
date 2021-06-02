@@ -23,6 +23,6 @@ const addOrder = dispatch => (cartItems, totalAmount) => {
 };
 export const {Provider, Context} = createDataContext(
   OrderReducer,
-  {},
+  {addOrder},
   {orders: []},
 );

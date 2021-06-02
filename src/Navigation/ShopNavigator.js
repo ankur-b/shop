@@ -1,45 +1,130 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 import {Platform} from 'react-native';
 import {HeaderButtons, Item} from 'react-navigation-header-buttons';
 import HeaderButton from '../UI/HeaderButton';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ProductOverview from '../Screens/Shop/ProductOverview';
 import ProductDetail from '../Screens/Shop/ProductsDetail';
-import Orders from '../Screens/Shop/Orders'
+import Orders from '../Screens/Shop/Orders';
 import Cart from '../Screens/Shop/Cart';
 import Colors from '../Constants/Colors';
-const ShopStack = createStackNavigator();
-const ShopStackScreens = () => {
+const ProductsStack = createStackNavigator();
+const OrderStack = createStackNavigator();
+const Drawer = createDrawerNavigator();
+const ProductsStackScreens = () => {
   return (
-    <ShopStack.Navigator
+    <ProductsStack.Navigator
       screenOptions={{
         headerStyle: {
           backgroundColor: Platform.OS === 'android' ? Colors.primary : '',
         },
         headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
       }}>
-      <ShopStack.Screen
+      <ProductsStack.Screen
         name="All Products"
         component={ProductOverview}
-        options={({navigation})=>({
+        options={({navigation}) => ({
+          headerLeft: props => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+              <Item
+                title="Menu"
+                iconName={Platform.OS === 'android' ? 'md-menu' : 'ios-menu'}
+                onPress={() => {
+                  navigation.toggleDrawer();
+                }}
+              />
+            </HeaderButtons>
+          ),
           headerRight: props => (
             <HeaderButtons HeaderButtonComponent={HeaderButton}>
               <Item
                 title="Cart"
                 iconName={Platform.OS === 'android' ? 'md-cart' : 'ios-cart'}
-                onPress={() => {navigation.navigate('Cart')}}
+                onPress={() => {
+                  navigation.navigate('Cart');
+                }}
               />
             </HeaderButtons>
           ),
         })}
       />
-      <ShopStack.Screen
+      <ProductsStack.Screen
         name="Product Detail"
         component={ProductDetail}
         options={({route}) => ({title: route.params.productTitle})}
       />
-      <ShopStack.Screen name="Cart" component={Cart} />
-    </ShopStack.Navigator>
+      <ProductsStack.Screen
+        name="Cart"
+        component={Cart}
+        options={props => ({title: 'Your Cart'})}
+      />
+    </ProductsStack.Navigator>
   );
 };
-export default ShopStackScreens;
+const OrderStackScreens = () => {
+  return (
+    <OrderStack.Navigator
+      screenOptions={{
+        headerTitle: 'Your Orders',
+        headerStyle: {
+          backgroundColor: Platform.OS === 'android' ? Colors.primary : '',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+      }}>
+      <OrderStack.Screen
+        name="Orders"
+        component={Orders}
+        options={({navigation}) => ({
+          headerLeft: props => (
+            <HeaderButtons HeaderButtonComponent={HeaderButton}>
+              <Item
+                title="Menu"
+                iconName={Platform.OS === 'android' ? 'md-menu' : 'ios-menu'}
+                onPress={() => {
+                  navigation.toggleDrawer();
+                }}
+              />
+            </HeaderButtons>
+          ),
+        })}
+      />
+    </OrderStack.Navigator>
+  );
+};
+const DrawerScreen = () => {
+  return (
+    <Drawer.Navigator
+      initialRouteName="Products"
+      drawerContentOptions={{
+        activeTintColor: Colors.primary,
+      }}>
+      <Drawer.Screen
+        options={{
+          drawerIcon: drawerConfig => (
+            <Icon
+              name={Platform.OS === 'android' ? 'md-cart' : 'ios-cart'}
+              size={23}
+            />
+          ),
+        }}
+        name="Products"
+        component={ProductsStackScreens}
+      />
+      <Drawer.Screen
+        options={{
+          drawerIcon: drawerConfig => (
+            <Icon
+              name={Platform.OS === 'android' ? 'md-list' : 'ios-list'}
+              size={23}
+            />
+          ),
+        }}
+        name="Orders"
+        component={OrderStackScreens}
+      />
+    </Drawer.Navigator>
+  );
+};
+export default DrawerScreen;

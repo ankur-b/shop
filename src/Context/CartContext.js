@@ -42,6 +42,11 @@ const CartReducer = (state, action) => {
           items:updatedCartItems,
           totalAmount:state.totalAmount.toFixed(2) - selectedCartItem.productPrice.toFixed(2)
       }
+    case 'CLEAR_CART':
+        return{
+          items:{},
+          totalAmount:0
+        }
     default:
       return state;
   }
@@ -52,8 +57,11 @@ const addToCart = dispatch => product => {
 const removeFromCart = dispatch => pid => {
   dispatch({type: 'REMOVE_FROM_CART', payload: pid});
 };
+const clearCart = dispatch => pid =>{
+  dispatch({type:'CLEAR_CART',payload:pid})
+}
 export const {Provider, Context} = createDataContext(
   CartReducer,
-  {addToCart,removeFromCart},
+  {addToCart,removeFromCart,clearCart},
   {items: {}, totalAmount: 0},
 );

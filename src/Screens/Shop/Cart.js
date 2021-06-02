@@ -5,7 +5,7 @@ import {Context as CartContext} from '../../Context/CartContext';
 import {Context as OrderContext} from '../../Context/OrderContext'
 import CartItem from '../../Components/Shop/CartItem';
 const CartScreen = props => {
-  const {state,removeFromCart} = useContext(CartContext);
+  const {state,removeFromCart,clearCart} = useContext(CartContext);
   const orderContext = useContext(OrderContext)
   const cartitems = [];
   for (const key in state.items) {
@@ -28,7 +28,8 @@ const CartScreen = props => {
           disabled={state.totalAmount === 0}
           title="Order Now"
           onPress={()=>{
-              orderContext.addOrder(cartitems,state.totalAmount)
+              orderContext.addOrder(cartitems,state.totalAmount)  
+              clearCart() 
           }}
         />
       </View>
