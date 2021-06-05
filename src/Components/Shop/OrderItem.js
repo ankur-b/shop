@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
-
 import {View, Text, Button, StyleSheet} from 'react-native';
 import Colors from '../../Constants/Colors';
 import CartItem from './CartItem';
+import Card from '../../UI/Card';
 const OrderItem = props => {
   const [showDetails, setShowDetails] = useState(false);
   return (

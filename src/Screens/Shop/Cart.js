@@ -4,6 +4,7 @@ import Colors from '../../Constants/Colors';
 import {Context as CartContext} from '../../Context/CartContext';
 import {Context as OrderContext} from '../../Context/OrderContext'
 import CartItem from '../../Components/Shop/CartItem';
+import Card from '../../UI/Card'
 const CartScreen = props => {
   const {state,removeFromCart,clearCart} = useContext(CartContext);
   const orderContext = useContext(OrderContext)

@@ -5,11 +5,11 @@ const ProductReducer = (state, action) => {
   switch (action.type) {
     case 'CREATE_PRODUCT':
       const newProduct = new Product(
-        new Date().toString(),
+        action.payload.id,
         'u1',
         action.payload.title,
-        action.payload.imageUrl,
         action.payload.description,
+        action.payload.imageUrl,
         action.payload.price,
       );
       return {
@@ -26,20 +26,20 @@ const ProductReducer = (state, action) => {
         state.userProducts[productIndex].ownerId,
         action.payload.title,
         action.payload.imageUrl,
-        state.userProducts[productIndex].price, 
         action.payload.description,
+        state.userProducts[productIndex].price,
       );
       const updatedUserProducts = [...state.userProducts];
       updatedUserProducts[productIndex] = updatedProduct;
       const availableProductIndex = state.userProducts.findIndex(
         prod => prod.id === action.payload.id,
       );
-      const updatedAvailableProducts = [...state.availableProducts]
-      updatedAvailableProducts[availableProductIndex] = updatedProduct
+      const updatedAvailableProducts = [...state.availableProducts];
+      updatedAvailableProducts[availableProductIndex] = updatedProduct;
       return {
         ...state,
-        availableProducts:updatedAvailableProducts,
-        userProducts:updatedUserProducts
+        availableProducts: updatedAvailableProducts,
+        userProducts: updatedUserProducts,
       };
     case 'DELETE_PRODUCT':
       return {
@@ -51,16 +51,34 @@ const ProductReducer = (state, action) => {
           product => product.id !== action.payload,
         ),
       };
+    case 'SET_PRODUCTS':
+      return{
+        availableProducts:action.payload,
+        userProducts:action.payload
+      }
     default:
       return state;
   }
 };
-const createProduct = dispatch => (title, description, imageUrl, price) => {
-  dispatch({
-    type: 'CREATE_PRODUCT',
-    payload: {title, description, imageUrl, price},
-  });
-};
+const createProduct =
+  dispatch => async (title, description, imageUrl, price) => {
+    const response = await fetch(
+      'https://shop-63045-default-rtdb.firebaseio.com/products.json',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({title, imageUrl, description, price}),
+      },
+    );
+    const resData = await response.json();
+    console.log(resData);
+    dispatch({
+      type: 'CREATE_PRODUCT',
+      payload: {id: resData.name, title, description, imageUrl, price},
+    });
+  };
 const updateProduct = dispatch => (id, title, description, imageUrl) => {
   dispatch({
     type: 'UPDATE_PRODUCT',
@@ -70,9 +88,20 @@ const updateProduct = dispatch => (id, title, description, imageUrl) => {
 const deleteProduct = dispatch => productId => {
   dispatch({type: 'DELETE_PRODUCT', payload: productId});
 };
+const fetchProducts = dispatch => async productId => {
+  const response = await fetch(
+    'https://shop-63045-default-rtdb.firebaseio.com/products.json');
+  const resData = await response.json();
+  const loadedProducts = []
+  for(const key in resData){
+    loadedProducts.push(new Product(key,'u1',resData[key].title,resData[key].imageUrl,resData[key].description,resData[key].price))
+  }
+  console.log(resData);
+  dispatch({type: 'SET_PRODUCTS', payload: loadedProducts});
+};
 export const {Provider, Context} = createDataContext(
   ProductReducer,
-  {deleteProduct, updateProduct, createProduct},
+  {deleteProduct, updateProduct, createProduct,fetchProducts},
   {
     availableProducts: PRODUCTS,
     userProducts: PRODUCTS.filter(prod => prod.ownerId === 'u1'),
