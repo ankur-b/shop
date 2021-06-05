@@ -1,14 +1,17 @@
-import React, {useReducer, useContext, useEffect, useCallback} from 'react';
+import React, {useReducer, useState,useContext, useEffect, useCallback} from 'react';
 import {
   View,
   ScrollView,
   StyleSheet,
   Alert,
-  KeyboardAvoidingView
+  Text,
+  KeyboardAvoidingView,
+  ActivityIndicator
 } from 'react-native';
 import {Context as ProductContext} from '../../Context/ProductContext';
 import {LogBox} from 'react-native';
 import Input from '../../UI/Input';
+import Colors  from '../../Constants/Colors';
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
 ]);
@@ -37,6 +40,8 @@ const formReducer = (state, action) => {
   return state;
 };
 const EditProduct = props => {
+  const [isLoading,setIsLoading] = useState(false)
+  const [error,setError] = useState()
   const {state, updateProduct, createProduct} = useContext(ProductContext);
   const prodId = props.route.params.productId;
   const editedProduct = state.userProducts.find(prod => prod.id === prodId);
@@ -55,34 +60,45 @@ const EditProduct = props => {
     },
     formIsValid: editedProduct ? true : false,
   });
-  const submitHandler = useCallback(() => {
+  useEffect(()=>{
+    if(error){
+      Alert.alert('An error occured!',error,[{text:'Okay'}])
+    }
+  },[error])
+  const submitHandler = useCallback( async() => {
     if (!formState.formIsValid) {
       Alert.alert('Wrong input!', 'Please check the errors in the form.', [
         {text: 'Okay'},
       ]);
       return;
     }
-    if (editedProduct) {
-      updateProduct(
-        prodId,
-        formState.inputValues.title,
-        formState.inputValues.description,
-        formState.inputValues.imageUrl,
-      );
+    setError(null)
+    setIsLoading(true)
+    try{
+      if (editedProduct) {
+        await updateProduct(
+          prodId,
+          formState.inputValues.title,
+          formState.inputValues.description,
+          formState.inputValues.imageUrl,
+        );
+      } else {
+        await createProduct(
+          formState.inputValues.title,
+          formState.inputValues.imageUrl,
+          formState.inputValues.description,
+          +formState.inputValues.price,
+        );
+      }
       props.navigation.goBack();
-    } else {
-      createProduct(
-        formState.inputValues.title,
-        formState.inputValues.imageUrl,
-        formState.inputValues.description,
-        +formState.inputValues.price,
-      );
-      props.navigation.goBack();
+    }catch(err){
+      setError(err.message)
     }
+    setIsLoading(false)
   });
   useEffect(() => {
     props.navigation.setParams({submit: submitHandler});
-  }, [updateProduct, createProduct, prodId, formState]);
+  }, [updateProduct,createProduct, prodId, formState]);
   const inputChangeHandler = useCallback((inputIdentifier, inputValue,inputValidity) => {
     dispatch({
       type: FORM_UPDATE,
@@ -91,6 +107,11 @@ const EditProduct = props => {
       input: inputIdentifier,
     });
   },[dispatch]);
+  if(isLoading){
+    return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ActivityIndicator size='large' color={Colors.primary}/>
+    </View>
+  }
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior="padding" keyboardVerticalOffset={100}>
     <ScrollView>

@@ -61,7 +61,7 @@ const ProductReducer = (state, action) => {
   }
 };
 const createProduct =
-  dispatch => async (title, imageUrl, description, price) => {
+  dispatch => async (title, description, imageUrl, price) => {
     const response = await fetch(
       'https://shop-63045-default-rtdb.firebaseio.com/products.json',
       {
@@ -69,7 +69,7 @@ const createProduct =
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({title, imageUrl, description, price}),
+        body: JSON.stringify({title, description, imageUrl, price}),
       },
     );
     const resData = await response.json();
@@ -79,28 +79,35 @@ const createProduct =
     });
   };
 const updateProduct = dispatch => async (id, title, description, imageUrl) => {
-  await fetch(
+  const response = await fetch(
     `https://shop-63045-default-rtdb.firebaseio.com/products/${id}.json`,
     {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({title, imageUrl, description}),
+      body: JSON.stringify({title, description, imageUrl}),
     },
   );
+  console.log(response)
+  if(!response.ok){
+    throw new Error('Something went wrong!')
+  }
   dispatch({
     type: 'UPDATE_PRODUCT',
     payload: {id, title, description, imageUrl},
   });
 };
 const deleteProduct = dispatch =>async (productId) => {
-  await fetch(
+  const response = await fetch(
     `https://shop-63045-default-rtdb.firebaseio.com/products/${productId}.json`,
     {
       method: 'DELETE',
     },
   );
+  if(!response.ok){
+    throw new Error('Something went wrong!')
+  }
   dispatch({type: 'DELETE_PRODUCT', payload: productId});
 };
 const fetchProducts = dispatch => async () => {

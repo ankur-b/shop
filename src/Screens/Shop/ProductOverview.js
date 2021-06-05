@@ -7,6 +7,7 @@ import Colors from '../../Constants/Colors';
 import PRODUCTS from '../../data/dummy-data';
 const ProductOverview = props => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing,setIsRefreshing] = useState(false)
   const [error, setError] = useState();
   const {state, fetchProducts} = useContext(ProductContext);
   const cartContext = useContext(CartContext);
@@ -18,13 +19,13 @@ const ProductOverview = props => {
   };
   const loadProducts = useCallback(async () => {
     setError(null);
-    setIsLoading(true);
+    setIsRefreshing(true)
     try {
       await fetchProducts();
     } catch (err) {
       setError(err.message);
     }
-    setIsLoading(false);
+    setIsRefreshing(false)
   }, [setError, setIsLoading]);
   useEffect(() => {
     const willFocusSub = props.navigation.addListener('focus', loadProducts);
@@ -33,7 +34,10 @@ const ProductOverview = props => {
     }
   },[loadProducts]);
   useEffect(() => {
-    loadProducts(); 
+    setIsLoading(true);
+    loadProducts().then(()=>{
+      setIsLoading(false)
+    }); 
   }, []);
   if (error) {
     return (
@@ -63,6 +67,8 @@ const ProductOverview = props => {
   }
   return (
     <FlatList
+      onRefresh={loadProducts}
+      refreshing={isRefreshing}
       data={state.availableProducts}
       keyExtractor={item => item.id}
       renderItem={itemData => (
