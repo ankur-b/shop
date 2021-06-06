@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {Platform} from 'react-native';
 import {HeaderButtons, Item} from 'react-navigation-header-buttons';
@@ -11,10 +12,12 @@ import Orders from '../Screens/Shop/Orders';
 import Cart from '../Screens/Shop/Cart';
 import UserProducts from '../Screens/User/UserProducts';
 import EditProduct from '../Screens/User/EditProduct';
+import AuthScreen from '../Screens/User/AuthScreen';
 import Colors from '../Constants/Colors';
 const ProductsStack = createStackNavigator();
 const OrderStack = createStackNavigator();
 const userStack = createStackNavigator();
+const authStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const ProductsStackScreens = () => {
   return (
@@ -148,7 +151,7 @@ const userStackScreens = () => {
                   Platform.OS === 'android' ? 'md-checkmark' : 'ios-checkmark'
                 }
                 onPress={() => {
-                  JSON.stringify(props.route.params.submit())
+                  JSON.stringify(props.route.params.submit());
                 }}
               />
             </HeaderButtons>
@@ -158,7 +161,20 @@ const userStackScreens = () => {
     </userStack.Navigator>
   );
 };
-const DrawerScreen = () => {
+const AuthStackScreens = () => {
+  return (
+    <authStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: Platform.OS === 'android' ? Colors.primary : '',
+        },
+        headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
+      }}>
+      <authStack.Screen name="Authenticate" component={AuthScreen} />
+    </authStack.Navigator>
+  );
+};
+const DrawerScreens = () => {
   return (
     <Drawer.Navigator
       initialRouteName="Products"
@@ -204,4 +220,13 @@ const DrawerScreen = () => {
     </Drawer.Navigator>
   );
 };
-export default DrawerScreen;
+
+const MainNavigator = () => {
+  const [isSignedIn, setIsSignedIn] = useState(null);
+  return (
+    <NavigationContainer>
+      {isSignedIn ? <DrawerScreens /> : <AuthStackScreens />}
+    </NavigationContainer>
+  );
+};
+export default MainNavigator;
