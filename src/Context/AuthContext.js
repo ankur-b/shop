@@ -1,6 +1,7 @@
 import createDataContext from './createDataContext';
 import AsyncStorage from '@react-native-community/async-storage';
 import API_KEY from '../../Firebase_API_KEY';
+let timer;
 const AuthReducer = (state, action) => {
   switch (action.type) {
     case 'SIGNUP':
@@ -53,6 +54,7 @@ const signup = dispatch => async (email, password) => {
   await AsyncStorage.setItem('token', resData.idToken);
   await AsyncStorage.setItem('userId', resData.localId);
   await AsyncStorage.setItem('expireTime', expirationDate);
+  setLogoutTimer(expirationDate)
   dispatch({
     type: 'SIGNUP',
     payload: {token: resData.idToken, userId: resData.localId},
@@ -91,12 +93,14 @@ const signin = dispatch => async (email, password) => {
   await AsyncStorage.setItem('token', resData.idToken);
   await AsyncStorage.setItem('userId', resData.localId);
   await AsyncStorage.setItem('expireTime', expirationDate);
+  setLogoutTimer()
   dispatch({
     type: 'SIGNIN',
     payload: {token: resData.idToken, userId: resData.localId},
   });
 };
 const signout = dispatch => async()=>{
+  clearLogoutTimer()
   await AsyncStorage.removeItem('token')
   await AsyncStorage.removeItem('userId')
   await AsyncStorage.removeItem('expireTime')
@@ -109,6 +113,8 @@ const tryLocalSignin =
     const userId = await AsyncStorage.getItem('userId');
     const token = await AsyncStorage.getItem('token');
     const expirationDate = new Date(expireTime);
+    const expirationTime = expirationDate.getTime() - new Date().getTime()
+    setLogoutTimer(expirationTime)
     if (!token && !userId && expirationDate <= new Date()) {
       navigation.navigate('Auth');
       return;
@@ -119,6 +125,16 @@ const tryLocalSignin =
       });
     }
   };
+const clearLogoutTimer = ()=>{
+  if(timer){
+    clearTimeout(timer)
+  }
+}
+const setLogoutTimer = expirationTime =>{
+  timer = setTimeout(()=>{
+    signout()
+  },expirationTime/1000)
+}
 export const {Provider, Context} = createDataContext(
   AuthReducer,
   {signup, signin,tryLocalSignin,signout},

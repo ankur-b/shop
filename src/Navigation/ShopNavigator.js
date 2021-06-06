@@ -177,9 +177,10 @@ const AuthStackScreens = () => {
       <authStack.Screen
         name="Auth"
         component={AuthScreen}
-        options={() => {
-          title: 'Authenticate';
-        }}
+        options={() => ({
+          title: 'Authenticate',
+          headerLeft: ()=> null
+        })}
       />
     </authStack.Navigator>
   );
