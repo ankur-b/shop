@@ -1,4 +1,5 @@
 import createDataContext from './createDataContext';
+import AsyncStorage from '@react-native-community/async-storage';
 import Order from '../Models/order';
 const OrderReducer = (state, action) => {
   switch (action.type) {
@@ -23,8 +24,10 @@ const OrderReducer = (state, action) => {
 };
 const addOrder = dispatch => async (cartItems, totalAmount) => {
   const date = new Date();
+  const token = await AsyncStorage.getItem('token');
+  const userId = await AsyncStorage.getItem('userId');
   const response = await fetch(
-    'https://shop-63045-default-rtdb.firebaseio.com/orders/u1.json',
+    `https://shop-63045-default-rtdb.firebaseio.com/orders/${userId}.json?auth=${token}`,
     {
       method: 'POST',
       headers: {
@@ -48,9 +51,10 @@ const addOrder = dispatch => async (cartItems, totalAmount) => {
   });
 };
 const fetchOrders = dispatch => async () => {
+  const userId = await AsyncStorage.getItem('userId');
   try {
     const response = await fetch(
-      'https://shop-63045-default-rtdb.firebaseio.com/orders/u1.json',
+      `https://shop-63045-default-rtdb.firebaseio.com/orders/${userId}.json`,
     );
     if (!response.ok) {
       throw new Error('Something went wrong!');

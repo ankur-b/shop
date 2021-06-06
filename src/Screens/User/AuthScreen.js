@@ -1,10 +1,18 @@
-import React, {useContext, useState,useReducer, useCallback} from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useReducer,
+  useCallback,
+} from 'react';
 import {
   ScrollView,
   View,
   Button,
   KeyboardAvoidingView,
   StyleSheet,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import {Context as AuthContext} from '../../Context/AuthContext';
 import Input from '../../UI/Input';
@@ -35,8 +43,10 @@ const formReducer = (state, action) => {
   return state;
 };
 const AuthScreen = props => {
-  const {state, signup,signin} = useContext(AuthContext);
-  const [isSignup,setIsSignup] = useState(false)
+  const {state, signup, signin} = useContext(AuthContext);
+  const [error, setError] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
   const [formState, dispatch] = useReducer(formReducer, {
     inputValues: {
       email: '',
@@ -48,11 +58,33 @@ const AuthScreen = props => {
     },
     formIsValid: false,
   });
+  useEffect(() => {
+    if (error) {
+      Alert.alert('An Error Occurred', error, [{text: 'Okay'}]);
+    }
+  }, [error]);
   const authHandler = () => {
-    if(isSignup){
-        signup(formState.inputValues.email, formState.inputValues.password);
-    }else{
-        signin(formState.inputValues.email, formState.inputValues.password);
+    if (isSignup) {
+      setIsLoading(true);
+      
+      signup(formState.inputValues.email, formState.inputValues.password)
+        .then(() => {
+          setIsLoading(false);
+        })
+        .catch(err => {
+          setError(err.message);
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(true);
+      signin(formState.inputValues.email, formState.inputValues.password)
+        .then(() => {
+          setIsLoading(false);
+        })
+        .catch(err => {
+          setError(err.message);
+          setIsLoading(false);
+        });
     }
   };
   const inputChangeHandler = useCallback(
@@ -97,14 +129,22 @@ const AuthScreen = props => {
             initialValue=""
           />
           <View style={styles.buttonContainer}>
-            <Button title={isSignup?'Sign Up':'Sign In'} color={Colors.primary} onPress={authHandler} />
+            {isLoading ? (
+              <ActivityIndicator size="small" color={Colors.primary} />
+            ) : (
+              <Button
+                title={isSignup ? 'Sign Up' : 'Sign In'}
+                color={Colors.primary}
+                onPress={authHandler}
+              />
+            )}
           </View>
           <View style={styles.buttonContainer}>
             <Button
-              title={`Switch to ${isSignup?'Sign In':'Sign Up'}`}
+              title={`Switch to ${isSignup ? 'Sign In' : 'Sign Up'}`}
               color={Colors.accent}
-              onPress={()=>{
-                  setIsSignup(prevState=>!prevState)
+              onPress={() => {
+                setIsSignup(prevState => !prevState);
               }}
             />
           </View>

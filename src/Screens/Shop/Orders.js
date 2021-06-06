@@ -1,12 +1,11 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {FlatList, View, ActivityIndicator} from 'react-native';
+import {FlatList, View, Text,ActivityIndicator} from 'react-native';
 import {Context as OrderContext} from '../../Context/OrderContext';
 import OrderItem from '../../Components/Shop/OrderItem';
 import Colors from '../../Constants/Colors';
 const OrdersScreen = props => {
   const [isLoading, setIsLoading] = useState(false);
   const {state, fetchOrders} = useContext(OrderContext);
-  const loadOrders = useCallback(async () => {}, [state, setIsLoading]);
   useEffect(() => {
     setIsLoading(true);
     fetchOrders().then(() => {
@@ -19,6 +18,11 @@ const OrdersScreen = props => {
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
+  }
+  if(state.orders.length ===0){
+    return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+      <Text>No order found.maybe start ordering some products?</Text>
+    </View>
   }
   return (
     <FlatList

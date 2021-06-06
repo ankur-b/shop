@@ -1,11 +1,18 @@
 import createDataContext from './createDataContext';
+import AsyncStorage from '@react-native-community/async-storage';
 import API_KEY from '../../Firebase_API_KEY';
 const AuthReducer = (state, action) => {
   switch (action.type) {
     case 'SIGNUP':
-      return {};
+      return {
+        token: action.payload.token,
+        userId: action.payload.userId,
+      };
     case 'SIGNIN':
-      return {};
+      return {
+        token: action.payload.token,
+        userId: action.payload.userId,
+      };
     default:
       return state;
   }
@@ -13,45 +20,95 @@ const AuthReducer = (state, action) => {
 const signup = dispatch => async (email, password) => {
   const response = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
-  {
-      method:"POST",
-      headers:{
-          'Content-Type':'application/json'
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      body:JSON.stringify({
-        email:email,password:password,returnSecureToken:true
-    })
-  });
-  console.log(email,password,'callback',API_KEY)
-  if(!response.ok){
-      throw new Error('Something went wrong!')
+      body: JSON.stringify({
+        email: email,
+        password: password,
+        returnSecureToken: true,
+      }),
+    },
+  );
+  if (!response.ok) {
+    const errorResData = await response.json();
+    const errorId = errorResData.error.message;
+    let message = 'Something went wrong';
+    if (errorId === 'EMAIL_EXISTS') {
+      message = 'This email already exists';
+    }
+    throw new Error(message);
   }
-  const resData = await response.json()
-  console.log(resData)
-  dispatch({type: 'SIGNUP'});
+  const resData = await response.json();
+  const expirationDate = new Date(
+    new Date().getTime() + parseInt(resData.expiresIn) * 1000,
+  ).toISOString();
+  await AsyncStorage.setItem('token', resData.idToken);
+  await AsyncStorage.setItem('userId', resData.localId);
+  await AsyncStorage.setItem('expireTime', expirationDate);
+  dispatch({
+    type: 'SIGNUP',
+    payload: {token: resData.idToken, userId: resData.localId},
+  });
 };
 const signin = dispatch => async (email, password) => {
-    const response = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`,
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`,
     {
-        method:"POST",
-        headers:{
-            'Content-Type':'application/json'
-        },
-        body:JSON.stringify({
-          email:email,password:password,returnSecureToken:true
-      })
-    });
-    console.log(email,password,'callback',API_KEY)
-    if(!response.ok){
-        throw new Error('Something went wrong!')
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+        returnSecureToken: true,
+      }),
+    },
+  );
+  if (!response.ok) {
+    const errorResData = await response.json();
+    const errorId = errorResData.error.message;
+    let message = 'Something went wrong';
+    if (errorId === 'EMAIL_NOT_FOUND') {
+      message = 'This email could not be found!';
+    } else if (errorId === 'INVALID_PASSWORD') {
+      message = 'This password is not valid';
     }
-    const resData = await response.json()
-    console.log(resData)
-    dispatch({type: 'SIGNIN'});
+    throw new Error(message);
+  }
+  const expirationDate = new Date(
+    new Date().getTime() + parseInt(resData.expiresIn) * 1000,
+  ).toISOString();
+  await AsyncStorage.setItem('token', resData.idToken);
+  await AsyncStorage.setItem('userId', resData.localId);
+  await AsyncStorage.setItem('expireTime', expirationDate);
+  dispatch({
+    type: 'SIGNIN',
+    payload: {token: resData.idToken, userId: resData.localId},
+  });
+};
+const tryLocalSignin =
+  dispatch =>
+  async ({navigation}) => {
+    const expireTime = await AsyncStorage.getItem('expireTime');
+    const userId = await AsyncStorage.getItem('userId');
+    const token = await AsyncStorage.getItem('token');
+    const expirationDate = new Date(expireTime);
+    if (!token && !userId && expirationDate <= new Date()) {
+      props.navigation.navigate('Auth');
+      return;
+    } else {
+      dispatch({
+        type: 'SIGNIN',
+        payload: {token: token, userId: userId},
+      });
+    }
   };
 export const {Provider, Context} = createDataContext(
   AuthReducer,
-  {signup,signin},
-  {},
+  {signup, signin,tryLocalSignin},
+  {token: null, userId: null},
 );

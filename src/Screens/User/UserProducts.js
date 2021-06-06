@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {FlatList, Button, Alert} from 'react-native';
+import {View,Text ,FlatList, Button, Alert} from 'react-native';
 import ProductItem from '../../Components/Shop/ProductItem';
 import {Context as ProductContext} from '../../Context/ProductContext';
 import {Context as CartContext} from '../../Context/CartContext';
@@ -25,6 +25,11 @@ const UserProducts = props => {
       },
     ]);
   };
+  if(state.userProducts.length ===0){
+    return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+      <Text>No products found.maybe start creating some</Text>
+    </View>
+  }
   return (
     <FlatList
       data={state.userProducts}

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
@@ -13,7 +13,9 @@ import Cart from '../Screens/Shop/Cart';
 import UserProducts from '../Screens/User/UserProducts';
 import EditProduct from '../Screens/User/EditProduct';
 import AuthScreen from '../Screens/User/AuthScreen';
+import StartupScreen from '../Screens/StartupScreen'
 import Colors from '../Constants/Colors';
+import {Context as AuthContext} from '../Context/AuthContext'
 const ProductsStack = createStackNavigator();
 const OrderStack = createStackNavigator();
 const userStack = createStackNavigator();
@@ -164,13 +166,15 @@ const userStackScreens = () => {
 const AuthStackScreens = () => {
   return (
     <authStack.Navigator
+      initialRouteName="start"
       screenOptions={{
         headerStyle: {
           backgroundColor: Platform.OS === 'android' ? Colors.primary : '',
         },
         headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
       }}>
-      <authStack.Screen name="Authenticate" component={AuthScreen} />
+      <authStack.Screen name="start" component={StartupScreen}/>
+      <authStack.Screen name="Auth " component={AuthScreen} options={()=>{title:"Authenticate"}} />
     </authStack.Navigator>
   );
 };
@@ -222,10 +226,10 @@ const DrawerScreens = () => {
 };
 
 const MainNavigator = () => {
-  const [isSignedIn, setIsSignedIn] = useState(null);
+  const {state} = useContext(AuthContext);
   return (
     <NavigationContainer>
-      {isSignedIn ? <DrawerScreens /> : <AuthStackScreens />}
+      {state.token ? <DrawerScreens /> : <AuthStackScreens />}
     </NavigationContainer>
   );
 };
