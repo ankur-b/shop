@@ -1,8 +1,8 @@
 import React, {useContext} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-import {Platform} from 'react-native';
+import {createDrawerNavigator, DrawerItemList} from '@react-navigation/drawer';
+import {Platform, Text,View,Button, SafeAreaView} from 'react-native';
 import {HeaderButtons, Item} from 'react-navigation-header-buttons';
 import HeaderButton from '../UI/HeaderButton';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -13,9 +13,9 @@ import Cart from '../Screens/Shop/Cart';
 import UserProducts from '../Screens/User/UserProducts';
 import EditProduct from '../Screens/User/EditProduct';
 import AuthScreen from '../Screens/User/AuthScreen';
-import StartupScreen from '../Screens/StartupScreen'
+import StartupScreen from '../Screens/StartupScreen';
 import Colors from '../Constants/Colors';
-import {Context as AuthContext} from '../Context/AuthContext'
+import {Context as AuthContext} from '../Context/AuthContext';
 const ProductsStack = createStackNavigator();
 const OrderStack = createStackNavigator();
 const userStack = createStackNavigator();
@@ -173,15 +173,34 @@ const AuthStackScreens = () => {
         },
         headerTintColor: Platform.OS === 'android' ? 'white' : Colors.primary,
       }}>
-      <authStack.Screen name="start" component={StartupScreen}/>
-      <authStack.Screen name="Auth " component={AuthScreen} options={()=>{title:"Authenticate"}} />
+      <authStack.Screen name="start" component={StartupScreen} />
+      <authStack.Screen
+        name="Auth"
+        component={AuthScreen}
+        options={() => {
+          title: 'Authenticate';
+        }}
+      />
     </authStack.Navigator>
   );
 };
 const DrawerScreens = () => {
+  const {signout} = useContext(AuthContext);
   return (
     <Drawer.Navigator
       initialRouteName="Products"
+      drawerContent={props => {
+        return (
+          <View style={{flex: 1,paddingTop:20}} >
+            <SafeAreaView>
+              <DrawerItemList {...props}/>
+            <Button title="Signout" color={Colors.primary} onPress={()=>{
+              signout()
+            }} />
+            </SafeAreaView>
+          </View>
+        );
+      }}
       drawerContentOptions={{
         activeTintColor: Colors.primary,
       }}>

@@ -13,6 +13,11 @@ const AuthReducer = (state, action) => {
         token: action.payload.token,
         userId: action.payload.userId,
       };
+    case "SIGNOUT":
+      return {
+        token:null,
+        userId:null
+      }
     default:
       return state;
   }
@@ -79,6 +84,7 @@ const signin = dispatch => async (email, password) => {
     }
     throw new Error(message);
   }
+  const resData = await response.json();
   const expirationDate = new Date(
     new Date().getTime() + parseInt(resData.expiresIn) * 1000,
   ).toISOString();
@@ -90,6 +96,12 @@ const signin = dispatch => async (email, password) => {
     payload: {token: resData.idToken, userId: resData.localId},
   });
 };
+const signout = dispatch => async()=>{
+  await AsyncStorage.removeItem('token')
+  await AsyncStorage.removeItem('userId')
+  await AsyncStorage.removeItem('expireTime')
+  dispatch({type:'SIGNOUT'})
+}
 const tryLocalSignin =
   dispatch =>
   async ({navigation}) => {
@@ -98,7 +110,7 @@ const tryLocalSignin =
     const token = await AsyncStorage.getItem('token');
     const expirationDate = new Date(expireTime);
     if (!token && !userId && expirationDate <= new Date()) {
-      props.navigation.navigate('Auth');
+      navigation.navigate('Auth');
       return;
     } else {
       dispatch({
@@ -109,6 +121,6 @@ const tryLocalSignin =
   };
 export const {Provider, Context} = createDataContext(
   AuthReducer,
-  {signup, signin,tryLocalSignin},
+  {signup, signin,tryLocalSignin,signout},
   {token: null, userId: null},
 );
